@@ -34,6 +34,8 @@ enum {
     TD_ESC_DEL,    // Tap once for KC_ESC, twice for KC_DEL
 };
 
+extern tap_dance_action_t tap_dance_actions[TD_ESC_DEL + 1];
+
 // Rename tap dances for keymap with shortcuts
 #define TD_LSPC TD(TD_LSPO_CAPS)
 #define TD_DRGS TD(TD_DRG_SNP)
@@ -79,4 +81,3 @@ void DRG_SNP_R_reset(tap_dance_state_t *state, void *user_data);
 
 void PM_MOD1_finished(tap_dance_state_t *state, void *user_data);
 void PM_MOD1_reset(tap_dance_state_t *state, void *user_data);
-

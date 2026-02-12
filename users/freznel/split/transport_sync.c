@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "transport_sync.h"
-#include "transactions.h"
+#include "split_common/transactions.h"
 #include <string.h>
 
 #ifdef UNICODE_COMMON_ENABLE
@@ -24,6 +24,12 @@ extern bool tap_toggling;
 #endif
 #ifdef SWAP_HANDS_ENABLE
 extern bool swap_hands;
+#endif
+#ifdef OS_DETECTION_ENABLE
+#    include "os_detection.h"
+#endif
+#ifdef CAPS_WORD_ENABLE
+#    include "caps_word.h"
 #endif
 
 extern userspace_config_t userspace_config;
@@ -91,7 +97,14 @@ void user_transport_update(void) {
 #ifdef SWAP_HANDS_ENABLE
         user_state.swap_hands = swap_hands;
 #endif
-        user_state.is_caps_word_on =  is_caps_word_on();
+#ifdef OS_DETECTION_ENABLE
+        user_state.detected_os = detected_host_os();
+#endif
+#ifdef CAPS_WORD_ENABLE
+        user_state.is_caps_word_on = is_caps_word_on();
+#else
+        user_state.is_caps_word_on = false;
+#endif
         user_state.host_driver_disabled = host_driver_disabled;
 #if defined (POINTING_DEVICE_MODES_ENABLE)
         user_state.split_pointing_mode = get_pointing_mode_id();

@@ -59,7 +59,8 @@ void rgb_matrix_update_pwm_buffers(void);
 #endif
 
 __attribute__((weak)) void shutdown_keymap(void) {}
-void                       shutdown_user(void) {
+bool                       shutdown_user(bool jump_to_bootloader) {
+    (void)jump_to_bootloader;
 #ifdef RGBLIGHT_ENABLE
     rgblight_enable_noeeprom();
     rgblight_mode_noeeprom(1);
@@ -74,6 +75,7 @@ void                       shutdown_user(void) {
 #endif
 
     shutdown_keymap();
+    return true;
 }
 
 __attribute__((weak)) void suspend_power_down_keymap(void) {}
@@ -154,9 +156,12 @@ layer_state_t default_layer_state_set_user(layer_state_t state) {
     return state;
 }
 
-__attribute__((weak)) void led_set_keymap(uint8_t usb_led) {}
-void                       led_set_user(uint8_t usb_led) {
-    led_set_keymap(usb_led);
+__attribute__((weak)) bool led_update_keymap(led_t led_state) {
+    (void)led_state;
+    return true;
+}
+bool led_update_user(led_t led_state) {
+    return led_update_keymap(led_state);
 }
 
 __attribute__((weak)) void eeconfig_init_keymap(void) {}
@@ -206,11 +211,6 @@ void                       matrix_slave_scan_user(void) {
 
 __attribute__((weak)) void housekeeping_task_keymap(void) {}
 void housekeeping_task_user(void) {
-    static bool has_ran_yet;
-    if (!has_ran_yet) {
-        has_ran_yet = true;
-        startup_user();
-    }
 #if defined(SPLIT_KEYBOARD) && defined(SPLIT_TRANSACTION_IDS_USER)
     housekeeping_task_transport_sync();
 #endif

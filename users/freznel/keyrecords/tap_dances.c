@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "keyrecords/tap_dances.h"
-#include "./quantum/pointing_device/pointing_device_modes.h"
+#include "pointing_device_modes.h"
 
 // + ---------- +
 // + TAP DANCES |

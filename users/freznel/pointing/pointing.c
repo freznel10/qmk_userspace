@@ -4,7 +4,13 @@
 
 
 #include "pointing.h"
+#include <stdlib.h>
+#ifdef HAPTIC_ENABLE
 #include "drivers/haptic/drv2605l.h"
+#    define POINTING_HAPTIC_PULSE() drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100)
+#else
+#    define POINTING_HAPTIC_PULSE() ((void)0)
+#endif
 #include "pointing_device_modes.h"
 
 // static uint16_t mouse_debounce_timer = 0;
@@ -33,19 +39,6 @@ void pointing_device_init_user(void) {
 __attribute__((weak)) report_mouse_t pointing_device_task_keymap(report_mouse_t mouse_report) {
     return mouse_report;
 }
-
-enum keymap_pointing_device_modes {
-    PM_BROW = PM_SAFE_RANGE, // BROWSER TAB Manipulation            [mode id 6]
-    PM_RGB_MODE_VAL,         // RGB Control for mode and Brightness [mode id 7]
-    PM_RGB_HUE_SAT,          // RGB Control for HUE and Saturation  [mode id 8]
-    PM_RGB_SPEED,            // RGB Control for Speed               [mode id 9]
-    PM_WINDOW,               // LGUI plus Arrow Keys                [mode id 10]
-    PM_SWITCHER,             // LGUI plus Arrow Keys (for rev)      [mode id 11]
-    PM_APP_2,                // ALT_TAB                             [mode id 12]
-    PM_CUR_ACCEL,            // Acceleration                        [mode id 13]
-    PM_BROWSER_CONTROL,      // Browser history                     [mode id 14]
-    PM_WIN_POS,              // Window repositinong                 [mode id 15]
-};
 
 const uint16_t pointing_device_mode_maps[][4] = {
     // PM_BROW
@@ -215,10 +208,10 @@ bool process_record_pointing(uint16_t keycode, keyrecord_t* record) {
             enable_acceleration = record->event.pressed;
             break;
         case TD_DRGS:
-            drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+            POINTING_HAPTIC_PULSE();
             break;
         case KC_BTN1:
-            drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+            POINTING_HAPTIC_PULSE();
             break;
         case KB_MO_APP:
         // toggle Alt key off on key release and reset flag
@@ -247,76 +240,76 @@ bool process_record_pointing(uint16_t keycode, keyrecord_t* record) {
         break;
         case ROUTE:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 tap_code(KC_X);
             }
         break;
         case ROTATE:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 tap_code(KC_R);
             }
         break;
         case DRAG_TRACKS:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 tap_code(KC_D);
             }
         break;
         case PLACE_VIA:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 tap_code(KC_V);
             }
         break;
         case TRACK_WIDTH:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 tap_code(KC_W);
             }
         break;
         case VIA_WIDTH:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 tap_code(KC_BACKSLASH);
             }
         break;
         case TRACK_POSTURE:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 tap_code(KC_SLASH);
             }
         break;
         case TRACK_CORNER_MODE:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 tap_code16(C(KC_SLASH));
             }
         break;
         case PMR_DRAG:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 set_pointing_mode_device(1);
                 toggle_pointing_mode_id(2);
             }
         break;
-        case PMR_LEFT:
+        case PML_DRAG:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 set_pointing_mode_device(0);
                 toggle_pointing_mode_id(2);
             }
         break;
         case PMR_VOL:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 set_pointing_mode_device(1);
                 toggle_pointing_mode_id(5);
             }
         break;
         case PML_VOL:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+    	        POINTING_HAPTIC_PULSE();
                 set_pointing_mode_device(0);
                 toggle_pointing_mode_id(5);
             }
@@ -353,4 +346,3 @@ bool is_mouse_record_user(uint16_t keycode, keyrecord_t* record) {
     return false;
 }
 #endif
-
