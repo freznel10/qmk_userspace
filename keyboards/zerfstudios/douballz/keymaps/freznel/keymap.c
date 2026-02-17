@@ -27,7 +27,6 @@
 #endif
 #include  "g/keymap_combo.h"
 
-#    include "pointing_device_modes.h"
 #include "pointing_device.h"
 #ifdef HAPTIC_ENABLE
 #include "drivers/haptic/drv2605l.h"

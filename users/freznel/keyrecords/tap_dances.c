@@ -16,7 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "keyrecords/tap_dances.h"
-#include "pointing_device_modes.h"
 
 // + ---------- +
 // + TAP DANCES |
@@ -134,13 +133,13 @@ void DRG_SNP_finished(tap_dance_state_t *state, void *user_data) {
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
                 if (is_keyboard_master()) {
-                    set_pointing_mode_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
+                    pointing_modes_set_active_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
                 }
-                toggle_pointing_mode_id(PM_DRAG);
+                pointing_modes_toggle_mode(PM_DRAG);
             #endif
             break;
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
-                toggle_pointing_mode_id(PM_DRAG);
+                pointing_modes_toggle_mode(PM_DRAG);
             #endif
             break;
         case TD_SINGLE_HOLD:
@@ -149,13 +148,13 @@ void DRG_SNP_finished(tap_dance_state_t *state, void *user_data) {
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
                if (is_keyboard_master()) {
-                    set_pointing_mode_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
+                    pointing_modes_set_active_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
                 }
-                set_pointing_mode_id(PM_DRAG);
+                pointing_modes_set_mode(PM_DRAG);
             #endif
             break;
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
-                set_pointing_mode_id(PM_DRAG);
+                pointing_modes_set_mode(PM_DRAG);
             #endif
             break;
         case TD_DOUBLE_TAP:
@@ -163,27 +162,27 @@ void DRG_SNP_finished(tap_dance_state_t *state, void *user_data) {
                 unichunky_set_pointer_sniping_enabled(!unichunky_get_pointer_sniping_enabled());
             #endif
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
-                toggle_pointing_mode_id(PM_PRECISION);
+                pointing_modes_toggle_mode(PM_PRECISION);
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
                if (is_keyboard_master()) {
-                    set_pointing_mode_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
+                    pointing_modes_set_active_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
                 }
-                toggle_pointing_mode_id(PM_PRECISION);
+                pointing_modes_toggle_mode(PM_PRECISION);
             #endif
             break;
         case TD_DOUBLE_HOLD:
             #if defined(KEYBOARD_unichunky)
-                set_pointing_mode_id(PM_PRECISION);
+                pointing_modes_set_mode(PM_PRECISION);
             #endif
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
-                set_pointing_mode_id(PM_PRECISION);
+                pointing_modes_set_mode(PM_PRECISION);
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
                if (is_keyboard_master()) {
-                    set_pointing_mode_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
+                    pointing_modes_set_active_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
                 }
-                set_pointing_mode_id(PM_PRECISION);
+                pointing_modes_set_mode(PM_PRECISION);
             #endif
             break;
         case TD_NONE:
@@ -201,9 +200,9 @@ void DRG_SNP_reset(tap_dance_state_t *state, void *user_data) {
             #endif
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)
                 if (is_keyboard_master()) {
-                    set_pointing_mode_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
+                    pointing_modes_set_active_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
                 }
-                set_pointing_mode_id(PM_NONE);
+                pointing_modes_set_mode(PM_NONE);
             #endif
             break;
         case TD_DOUBLE_TAP:
@@ -213,7 +212,7 @@ void DRG_SNP_reset(tap_dance_state_t *state, void *user_data) {
                 unichunky_set_pointer_sniping_enabled(0);
             #endif
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)
-                 toggle_pointing_mode_id(PM_NONE);
+                 pointing_modes_toggle_mode(PM_NONE);
             #endif
             break;
         case TD_NONE:
@@ -237,18 +236,18 @@ void DRG_SNP_R_finished(tap_dance_state_t *state, void *user_data) {
                 unichunky_set_pointer_dragscroll_enabled(!unichunky_get_pointer_dragscroll_enabled());
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
-                switch (get_pointing_mode_device()) {
+                switch (pointing_modes_get_active_device()) {
                     case PM_RIGHT_DEVICE:
-                        set_pointing_mode_device(PM_LEFT_DEVICE);
-                        toggle_pointing_mode_id(PM_DRAG);
+                        pointing_modes_set_active_device(PM_LEFT_DEVICE);
+                        pointing_modes_toggle_mode(PM_DRAG);
                         break;
                     case PM_LEFT_DEVICE:
-                        toggle_pointing_mode_id(PM_DRAG);
+                        pointing_modes_toggle_mode(PM_DRAG);
                         break;
                 }
             #endif
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
-                toggle_pointing_mode_id(PM_DRAG);
+                pointing_modes_toggle_mode(PM_DRAG);
             #endif
             break;
         case TD_SINGLE_HOLD:
@@ -256,18 +255,18 @@ void DRG_SNP_R_finished(tap_dance_state_t *state, void *user_data) {
                 unichunky_set_pointer_dragscroll_enabled(1);
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
-                switch (get_pointing_mode_device()) {
+                switch (pointing_modes_get_active_device()) {
                     case PM_RIGHT_DEVICE:
-                        set_pointing_mode_device(PM_LEFT_DEVICE);
-                        set_pointing_mode_id(PM_DRAG);
+                        pointing_modes_set_active_device(PM_LEFT_DEVICE);
+                        pointing_modes_set_mode(PM_DRAG);
                         break;
                     case PM_LEFT_DEVICE:
-                        set_pointing_mode_id(PM_DRAG);
+                        pointing_modes_set_mode(PM_DRAG);
                         break;
                 }
             #endif
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
-                set_pointing_mode_id(PM_DRAG);
+                pointing_modes_set_mode(PM_DRAG);
             #endif
             break;
         case TD_DOUBLE_TAP:
@@ -275,34 +274,34 @@ void DRG_SNP_R_finished(tap_dance_state_t *state, void *user_data) {
                 unichunky_set_pointer_sniping_enabled(!unichunky_get_pointer_sniping_enabled());
             #endif
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
-                toggle_pointing_mode_id(PM_PRECISION);
+                pointing_modes_toggle_mode(PM_PRECISION);
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
-             switch (get_pointing_mode_device()) {
+             switch (pointing_modes_get_active_device()) {
                     case PM_RIGHT_DEVICE:
-                        set_pointing_mode_device(PM_LEFT_DEVICE);
-                        toggle_pointing_mode_id(PM_PRECISION);
+                        pointing_modes_set_active_device(PM_LEFT_DEVICE);
+                        pointing_modes_toggle_mode(PM_PRECISION);
                         break;
                     case PM_LEFT_DEVICE:
-                        toggle_pointing_mode_id(PM_PRECISION);
+                        pointing_modes_toggle_mode(PM_PRECISION);
             }
             #endif
             break;
         case TD_DOUBLE_HOLD:
             #if defined(KEYBOARD_unichunky)
-                set_pointing_mode_id(PM_PRECISION);
+                pointing_modes_set_mode(PM_PRECISION);
             #endif
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
-                set_pointing_mode_id(PM_PRECISION);
+                pointing_modes_set_mode(PM_PRECISION);
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
-                switch (get_pointing_mode_device()) {
+                switch (pointing_modes_get_active_device()) {
                     case PM_RIGHT_DEVICE:
-                        set_pointing_mode_device(PM_LEFT_DEVICE);
-                        set_pointing_mode_id(PM_PRECISION);
+                        pointing_modes_set_active_device(PM_LEFT_DEVICE);
+                        pointing_modes_set_mode(PM_PRECISION);
                         break;
                     case PM_LEFT_DEVICE:
-                        set_pointing_mode_id(PM_PRECISION);
+                        pointing_modes_set_mode(PM_PRECISION);
                         break;
                 }
             #endif
@@ -322,10 +321,10 @@ void DRG_SNP_R_reset(tap_dance_state_t *state, void *user_data) {
                 unichunky_set_pointer_dragscroll_enabled(0);
             #endif
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
-                set_pointing_mode_id(PM_NONE);
+                pointing_modes_set_mode(PM_NONE);
             #endif
             #if defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)
-                set_pointing_mode_id(PM_NONE);
+                pointing_modes_set_mode(PM_NONE);
             #endif
             break;
         case TD_DOUBLE_TAP:
@@ -335,10 +334,10 @@ void DRG_SNP_R_reset(tap_dance_state_t *state, void *user_data) {
                 unichunky_set_pointer_sniping_enabled(0);
             #endif
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
-                toggle_pointing_mode_id(PM_NONE);
+                pointing_modes_toggle_mode(PM_NONE);
             #endif
             #if defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)
-                 toggle_pointing_mode_id(PM_NONE);
+                 pointing_modes_toggle_mode(PM_NONE);
             #endif
             break;
         case TD_NONE:
@@ -362,13 +361,13 @@ void PM_MOD1_finished(tap_dance_state_t *state, void *user_data) {
                 tap_code16(S(C(KC_TAB)));
             break;
         case TD_SINGLE_HOLD:
-                set_pointing_mode_id(6);
+                pointing_modes_set_mode(6);
             break;
         case TD_DOUBLE_TAP:
-                toggle_pointing_mode_id(3);
+                pointing_modes_toggle_mode(3);
             break;
         case TD_DOUBLE_HOLD:
-                set_pointing_mode_id(3);
+                pointing_modes_set_mode(3);
             break;
         case TD_NONE:
             break;
@@ -380,12 +379,12 @@ void PM_MOD1_reset(tap_dance_state_t *state, void *user_data) {
         case TD_SINGLE_TAP:
             break;
         case TD_SINGLE_HOLD:
-                set_pointing_mode_id(0);
+                pointing_modes_set_mode(0);
             break;
         case TD_DOUBLE_TAP:
             break;
         case TD_DOUBLE_HOLD:
-                toggle_pointing_mode_id(PM_NONE);
+                pointing_modes_toggle_mode(PM_NONE);
             break;
         case TD_NONE:
             break;

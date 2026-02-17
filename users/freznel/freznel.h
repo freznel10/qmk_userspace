@@ -6,7 +6,7 @@
 #include QMK_KEYBOARD_H
 
 #include "keycode_compat.h"
-#include "pointing_device_modes.h"
+#include "custom_pointing_modes.h"
 #include "keyrecords/wrappers.h"
 #include "keyrecords/process_records.h"
 #include "callbacks.h"

@@ -8,7 +8,6 @@
 #include "bindings/bindings.h"
 #include "freznel.h"
 #include "../zerfstudios/emblem/emblem.h"
-#include "pointing_device_modes.h"
 
 #include "menu.h"
 #include "dial_menu/dial_menu.h"
