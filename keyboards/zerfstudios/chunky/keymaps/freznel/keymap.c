@@ -34,6 +34,64 @@
 
 #include "adps9660.h"
 
+// Pointing Device Mode Maps
+// Must be in keymap.c so keymap_introspection.c can see it via #include KEYMAP_C
+// Map index order must match custom_pointing_modes_map_index in custom_pointing_modes.h
+#ifdef POINTING_MODES_MAP_ENABLE
+const uint16_t PROGMEM pointing_modes_maps[][POINTING_MODES_NUM_DIRECTIONS] = {
+    [_PM_BROW] = {
+                    C(S(KC_PGUP)),
+        C(S(KC_TAB)),               C(KC_TAB),
+                    C(S(KC_PGDN))
+    },
+    [_PM_RGB_MODE_VAL] = {
+                    RGB_VAI,
+        RGB_RMOD,               RGB_MOD,
+                    RGB_VAD
+    },
+    [_PM_RGB_HUE_SAT] = {
+                    RGB_SAI,
+        RGB_HUD,                RGB_HUI,
+                    RGB_SAD
+    },
+    [_PM_RGB_SPEED] = {
+                    KC_NO,
+        RGB_SPD,                RGB_SPI,
+                    KC_NO
+    },
+    [_PM_WINDOW] = {
+                    G(KC_UP),
+        G(KC_LEFT),             G(KC_RIGHT),
+                    G(KC_DOWN)
+    },
+    [_PM_SWITCHER] = {
+                    G(KC_UP),
+        G(KC_LEFT),             G(KC_RIGHT),
+                    G(KC_DOWN)
+    },
+    [_PM_BROWSER_CONTROL] = {
+                    KC_NO,
+        KC_WBAK,                KC_WFWD,
+                    KC_NO
+    },
+    [_PM_CARET] = {
+                    KC_UP,
+        KC_LEFT,                KC_RIGHT,
+                    KC_DOWN
+    },
+    [_PM_HISTORY] = {
+                    KC_NO,
+        C(KC_Z),                C(S(KC_Z)),
+                    KC_NO
+    },
+    [_PM_VOL] = {
+                    KC_VOLU,
+        KC_MPRV,                KC_MNXT,
+                    KC_VOLD
+    },
+};
+#endif // POINTING_MODES_MAP_ENABLE
+
 #define DQT QK_DEBUG_TOGGLE
 
 #define DYN_000 DYN_MACRO_KEY00

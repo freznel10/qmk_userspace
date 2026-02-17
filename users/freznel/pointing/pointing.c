@@ -36,61 +36,6 @@ __attribute__((weak)) report_mouse_t pointing_device_task_keymap(report_mouse_t 
     return mouse_report;
 }
 
-// Pointing Device Mode Maps (new API: PROGMEM, POINTING_MODES_NUM_DIRECTIONS)
-// Map index order must match custom_pointing_modes_map_index enum in custom_pointing_modes.h
-// Format per entry: { up, left, right, down }
-const uint16_t PROGMEM pointing_modes_maps[][POINTING_MODES_NUM_DIRECTIONS] = {
-    [_PM_BROW] = {
-                    C(S(KC_PGUP)),
-        C(S(KC_TAB)),               C(KC_TAB),
-                    C(S(KC_PGDN))
-    },
-    [_PM_RGB_MODE_VAL] = {
-                    RGB_VAI,
-        RGB_RMOD,               RGB_MOD,
-                    RGB_VAD
-    },
-    [_PM_RGB_HUE_SAT] = {
-                    RGB_SAI,
-        RGB_HUD,                RGB_HUI,
-                    RGB_SAD
-    },
-    [_PM_RGB_SPEED] = {
-                    KC_NO,
-        RGB_SPD,                RGB_SPI,
-                    KC_NO
-    },
-    [_PM_WINDOW] = {
-                    G(KC_UP),
-        G(KC_LEFT),             G(KC_RIGHT),
-                    G(KC_DOWN)
-    },
-    [_PM_SWITCHER] = {
-                    G(KC_UP),
-        G(KC_LEFT),             G(KC_RIGHT),
-                    G(KC_DOWN)
-    },
-    [_PM_BROWSER_CONTROL] = {
-                    KC_NO,
-        KC_WBAK,                KC_WFWD,
-                    KC_NO
-    },
-    [_PM_CARET] = {
-                    KC_UP,
-        KC_LEFT,                KC_RIGHT,
-                    KC_DOWN
-    },
-    [_PM_HISTORY] = {
-                    KC_NO,
-        C(KC_Z),                C(S(KC_Z)),
-                    KC_NO
-    },
-    [_PM_VOL] = {
-                    KC_VOLU,
-        KC_MPRV,                KC_MNXT,
-                    KC_VOLD
-    },
-};
 
 // Divisor callback (new API: mouse_xy_report_t return, PMD_* direction constants)
 mouse_xy_report_t pointing_modes_get_divisor_user(uint8_t mode_id, uint8_t direction) {
