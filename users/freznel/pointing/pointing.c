@@ -2,15 +2,17 @@
 // Copyright 2022 Freznel B. Sta. Ana  (@freznel10) <freznel@gmail.com>
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-
 #include "pointing.h"
+#include <stdlib.h>
+#ifdef HAPTIC_ENABLE
 #include "drivers/haptic/drv2605l.h"
-#include "pointing_device_modes.h"
+#    define POINTING_HAPTIC_PULSE() drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100)
+#else
+#    define POINTING_HAPTIC_PULSE() ((void)0)
+#endif
 
-// static uint16_t mouse_debounce_timer = 0;
 bool            enable_acceleration = false;
 static bool     APP_ALT, APP_WIN;
-
 
 #ifdef TAPPING_TERM_PER_KEY
 #    define TAP_CHECK get_tapping_term(KC_BTN1, NULL)
@@ -34,180 +36,161 @@ __attribute__((weak)) report_mouse_t pointing_device_task_keymap(report_mouse_t 
     return mouse_report;
 }
 
-enum keymap_pointing_device_modes {
-    PM_BROW = PM_SAFE_RANGE, // BROWSER TAB Manipulation            [mode id 6]
-    PM_RGB_MODE_VAL,         // RGB Control for mode and Brightness [mode id 7]
-    PM_RGB_HUE_SAT,          // RGB Control for HUE and Saturation  [mode id 8]
-    PM_RGB_SPEED,            // RGB Control for Speed               [mode id 9]
-    PM_WINDOW,               // LGUI plus Arrow Keys                [mode id 10]
-    PM_SWITCHER,             // LGUI plus Arrow Keys (for rev)      [mode id 11]
-    PM_APP_2,                // ALT_TAB                             [mode id 12]
-    PM_CUR_ACCEL,            // Acceleration                        [mode id 13]
-    PM_BROWSER_CONTROL,      // Browser history                     [mode id 14]
-    PM_WIN_POS,              // Window repositinong                 [mode id 15]
+// Pointing Device Mode Maps (new API: PROGMEM, POINTING_MODES_NUM_DIRECTIONS)
+// Map index order must match custom_pointing_modes_map_index enum in custom_pointing_modes.h
+// Format per entry: { up, left, right, down }
+const uint16_t PROGMEM pointing_modes_maps[][POINTING_MODES_NUM_DIRECTIONS] = {
+    [_PM_BROW] = {
+                    C(S(KC_PGUP)),
+        C(S(KC_TAB)),               C(KC_TAB),
+                    C(S(KC_PGDN))
+    },
+    [_PM_RGB_MODE_VAL] = {
+                    RGB_VAI,
+        RGB_RMOD,               RGB_MOD,
+                    RGB_VAD
+    },
+    [_PM_RGB_HUE_SAT] = {
+                    RGB_SAI,
+        RGB_HUD,                RGB_HUI,
+                    RGB_SAD
+    },
+    [_PM_RGB_SPEED] = {
+                    KC_NO,
+        RGB_SPD,                RGB_SPI,
+                    KC_NO
+    },
+    [_PM_WINDOW] = {
+                    G(KC_UP),
+        G(KC_LEFT),             G(KC_RIGHT),
+                    G(KC_DOWN)
+    },
+    [_PM_SWITCHER] = {
+                    G(KC_UP),
+        G(KC_LEFT),             G(KC_RIGHT),
+                    G(KC_DOWN)
+    },
+    [_PM_BROWSER_CONTROL] = {
+                    KC_NO,
+        KC_WBAK,                KC_WFWD,
+                    KC_NO
+    },
+    [_PM_CARET] = {
+                    KC_UP,
+        KC_LEFT,                KC_RIGHT,
+                    KC_DOWN
+    },
+    [_PM_HISTORY] = {
+                    KC_NO,
+        C(KC_Z),                C(S(KC_Z)),
+                    KC_NO
+    },
+    [_PM_VOL] = {
+                    KC_VOLU,
+        KC_MPRV,                KC_MNXT,
+                    KC_VOLD
+    },
 };
 
-const uint16_t pointing_device_mode_maps[][4] = {
-    // PM_BROW
-    [0] = POINTING_MODE_LAYOUT(
-                C(S(KC_PGUP)),
-        C(S(KC_TAB)),       C(KC_TAB),
-                C(S(KC_PGDN))
-    ),
-    // PM_RGB_MODE_VAL
-    [1] = POINTING_MODE_LAYOUT(
-                RGB_VAI,
-        RGB_RMOD,        RGB_MOD,
-                RGB_VAD
-    ),
-    // PM_RGB_HUE_SAT
-    [2] = POINTING_MODE_LAYOUT(
-                RGB_SAI,
-        RGB_HUD,        RGB_HUI,
-                RGB_SAD
-    ),
-    // PM_RGB_SPEED
-    [3] = POINTING_MODE_LAYOUT(
-                KC_NO,
-        RGB_SPD,        RGB_SPI,
-                KC_NO
-    ),
-    // PM_WINDOW
-    [4] = POINTING_MODE_LAYOUT(
-                G(KC_UP),
-        G(KC_LEFT),      G(KC_RIGHT),
-                G(KC_DOWN)
-    ),
-    // PM_SWITCHER : PM 11
-    [5] = POINTING_MODE_LAYOUT(
-                G(KC_UP),
-        G(KC_LEFT),      G(KC_RIGHT),
-                G(KC_DOWN)
-    ),
-    // ALT_TAB: PM 12
-    [6] = POINTING_MODE_LAYOUT(
-                KC_NO,
-        KC_NO,        KC_NO,
-                KC_NO
-    ),
-    // ACCEL: PM 13
-    [7] = POINTING_MODE_LAYOUT(
-                KC_NO,
-        KC_NO,        KC_NO,
-                KC_NO
-    ),
-    // Browser Control: PM14
-    [8] = POINTING_MODE_LAYOUT(
-                KC_NO,
-        KC_WBAK,        KC_WFWD,
-                KC_NO
-    ),
-    //Windows Positioning: PM15
-    [9] = POINTING_MODE_LAYOUT(
-                KC_NO,
-        KC_NO,        KC_NO,
-                KC_NO
-    )
-};
-
-uint8_t get_pointing_mode_divisor_user(uint8_t mode_id, uint8_t direction) {
-    switch(mode_id) {
+// Divisor callback (new API: mouse_xy_report_t return, PMD_* direction constants)
+mouse_xy_report_t pointing_modes_get_divisor_user(uint8_t mode_id, uint8_t direction) {
+    switch (mode_id) {
         case PM_BROW:
-            // half speed for vertical axis
-            return direction < PD_LEFT ? 128 : 64;
+            return (direction & PMD_VERT) ? 128 : 64;
         case PM_RGB_MODE_VAL:
-            // half speed for horizontal axis
-            return direction < PD_LEFT ? 64 : 128;
+            return (direction & PMD_VERT) ? 64 : 128;
         case PM_RGB_HUE_SAT:
-            // example of unique divisor for each mode (not actually recommended for this mode (64 would be a good divisor here))
-            switch(direction) {
-                case PD_DOWN:
-                    return 32;
-                case PD_UP:
-                    return 64;
-                case PD_LEFT:
-                    return 16;
-                case PD_RIGHT:
-                    return 128;
+            switch (direction) {
+                case PMD_DOWN:  return 32;
+                case PMD_UP:    return 64;
+                case PMD_LEFT:  return 16;
+                case PMD_RIGHT: return 128;
             }
-        case PM_RGB_SPEED:
-            return 64; // could skip adding this if default if POINTING_DEFAULT_DIVISOR is 64
-        case PM_WINDOW:
-            return 128;
-        case PM_SWITCHER:
-            return 64;
-        case PM_CUR_ACCEL:
-            return 8;
-        case PM_APP_2:
-            return 64;
-        case PM_BROWSER_CONTROL:
-            return 64;
-        case PM_WIN_POS:
-            return 128; // could skip adding this if default if POINTING_DEFAULT_DIVISOR is 64
+            break;
+        case PM_RGB_SPEED:      return 64;
+        case PM_WINDOW:         return 128;
+        case PM_SWITCHER:       return 64;
+        case PM_CUR_ACCEL:      return 8;
+        case PM_APP_2:          return 64;
+        case PM_BROWSER_CONTROL: return 64;
+        case PM_WIN_POS:        return 128;
+        case PM_PRECISION:      return 8;
     }
-
-    return 0; // returning 0 to let processing of divisors continue
+    return 0; // let default processing continue
 }
 
+#define CONSTRAIN_XY(value) ((value) > XY_REPORT_MAX ? XY_REPORT_MAX : (value) < XY_REPORT_MIN ? XY_REPORT_MIN : (value))
 
-#define CONSTRAIN_XY(value) (value > XY_REPORT_MAX ? XY_REPORT_MAX : value < XY_REPORT_MIN? XY_REPORT_MIN: value)
-
-bool process_pointing_mode_user(pointing_mode_t pointing_mode, report_mouse_t* mouse_report) {
-    switch(pointing_mode.id){
-        /** Manipulate browser tabs (win/linux) (switch to left tab, move tab left, move tab right, switch to right tab)
-         *  Note that this mode could be put in a mode map but is here as an example of going past the bottom support 10 modes
-         *  without overwriting any built in modes
-         */
-        // Manipulating pointing_mode & mouse_report (cursor speed boost mode example)
-        case PM_CUR_ACCEL:
-            // reset mouse_report note that mouse_report is a pointer in this function's context
-            *mouse_report = pointing_device_get_report();
-            // set up temp variable and context
-            {
-                // add linear boost to cursor x speed
-                mouse_xy_report_t temp_mouse_axis = apply_divisor_xy(pointing_mode.x);
-#ifdef POINTING_DEVICE_INVERT_H
-                mouse_report->x = CONSTRAIN_XY(mouse_report->x - temp_mouse_axis);
-#else
-                mouse_report->x = CONSTRAIN_XY(mouse_report->x + temp_mouse_axis);
-#endif
-                // collect residual
-                pointing_mode.x -= multiply_divisor_xy(temp_mouse_axis);
-                // add linear boost to cursor y speed
-                temp_mouse_axis = apply_divisor_xy(pointing_mode.y);
-#ifdef POINTING_DEVICE_INVERT_V
-                mouse_report->y = CONSTRAIN_XY(mouse_report->y - apply_divisor_xy(pointing_mode.y));
-#else
-                mouse_report->y = CONSTRAIN_XY(mouse_report->y + apply_divisor_xy(pointing_mode.y));
-#endif
-                // collect residual
-                pointing_mode.y -= multiply_divisor_xy(temp_mouse_axis);
+// Custom task callback for non-map modes (new API signature)
+bool pointing_modes_task_user(report_mouse_t* mouse_report, pointing_modes_residuals_t* residuals) {
+    switch (pointing_modes_get_mode()) {
+        case PM_PRECISION: {
+            mouse_xy_report_t divisor = pointing_modes_get_divisor();
+            if (divisor) {
+                mouse_report->x += (mouse_xy_report_t)(residuals->x / divisor);
+                residuals->x     = residuals->x % divisor;
+                mouse_report->y += (mouse_xy_report_t)(residuals->y / divisor);
+                residuals->y     = residuals->y % divisor;
             }
-            // update pointing_mode with residual stored x & y
-            set_pointing_mode(pointing_mode);
-            // NOTE: mouse_report does not need to be set or sent here as it will be carried forward
-            return false; // stop pointing mode processing
-
-        // Alternative method for app scrolling that only toggles ALT key when there is movement and holds until key release
-        case PM_APP_2:
-            // activate alt key if greater/equal to divisor and set flag
-            if((abs(pointing_mode.x)) >= current_pointing_mode_divisor() && !APP_ALT) {
+            pointing_modes_set_residuals(*residuals);
+            return false;
+        }
+        case PM_CUR_ACCEL: {
+            *mouse_report = pointing_device_get_report();
+            mouse_xy_report_t divisor = pointing_modes_get_divisor();
+            if (divisor) {
+                mouse_xy_report_t dx = residuals->x / divisor;
+                mouse_xy_report_t dy = residuals->y / divisor;
+#ifdef POINTING_DEVICE_INVERT_H
+                mouse_report->x = CONSTRAIN_XY(mouse_report->x - dx);
+#else
+                mouse_report->x = CONSTRAIN_XY(mouse_report->x + dx);
+#endif
+#ifdef POINTING_DEVICE_INVERT_V
+                mouse_report->y = CONSTRAIN_XY(mouse_report->y - dy);
+#else
+                mouse_report->y = CONSTRAIN_XY(mouse_report->y + dy);
+#endif
+                residuals->x -= dx * divisor;
+                residuals->y -= dy * divisor;
+            }
+            pointing_modes_set_residuals(*residuals);
+            return false;
+        }
+        case PM_APP_2: {
+            mouse_xy_report_t divisor = pointing_modes_get_divisor();
+            if (abs(residuals->x) >= divisor && !APP_ALT) {
                 register_code(KC_LALT);
                 APP_ALT = true;
             }
-            pointing_tap_codes(S(KC_TAB), KC_NO, KC_NO, KC_TAB);
+            mouse_xy_report_t moved = pointing_modes_apply_divisor(PM_H_AXIS);
+            if (moved > 0) tap_code16(KC_TAB);
+            else if (moved < 0) tap_code16(S(KC_TAB));
             return false;
-        case PM_WIN_POS:
-            if((abs(pointing_mode.x)) >= current_pointing_mode_divisor() && !APP_WIN) {
+        }
+        case PM_WIN_POS: {
+            mouse_xy_report_t divisor = pointing_modes_get_divisor();
+            if (abs(residuals->x) >= divisor && !APP_WIN) {
                 register_code(KC_LGUI);
                 APP_WIN = true;
             }
-            pointing_tap_codes(KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT);
+            // Original pointing_tap_codes(KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT)
+            // = UP→KC_LEFT, DOWN→KC_DOWN, LEFT→KC_UP, RIGHT→KC_RIGHT
+            uint8_t dir = pointing_modes_get_direction();
+            mouse_xy_report_t moved_h = pointing_modes_apply_divisor(PM_H_AXIS);
+            mouse_xy_report_t moved_v = pointing_modes_apply_divisor(PM_V_AXIS);
+            if (moved_h > 0) tap_code16(KC_RIGHT);
+            else if (moved_h < 0) tap_code16(KC_UP);
+            if (moved_v > 0) tap_code16(KC_DOWN);
+            else if (moved_v < 0) tap_code16(KC_LEFT);
+            (void)dir;
             return false;
+        }
+        default:
+            break;
     }
-    return true;
+    return true; // let map / default processing continue
 }
-
 
 bool process_record_pointing(uint16_t keycode, keyrecord_t* record) {
     switch (keycode) {
@@ -215,115 +198,114 @@ bool process_record_pointing(uint16_t keycode, keyrecord_t* record) {
             enable_acceleration = record->event.pressed;
             break;
         case TD_DRGS:
-            drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+            POINTING_HAPTIC_PULSE();
             break;
         case KC_BTN1:
-            drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+            POINTING_HAPTIC_PULSE();
             break;
         case KB_MO_APP:
-        // toggle Alt key off on key release and reset flag
-            if(!record->event.pressed && APP_ALT) {
+            if (!record->event.pressed && APP_ALT) {
                 unregister_code(KC_LALT);
                 APP_ALT = false;
             }
-            pointing_mode_key_momentary(PM_APP_2, record);
-        break;
+            pointing_modes_key_momentary(PM_APP_2, record->event.pressed);
+            break;
         case KB_TG_ACCEL:
-            pointing_mode_key_toggle(PM_CUR_ACCEL, record);
-        break; // continue key record processing
+            pointing_modes_key_toggle(PM_CUR_ACCEL, record->event.pressed);
+            break;
         case KB_MO_WINDOW:
-            if(!record->event.pressed && APP_WIN) {
+            if (!record->event.pressed && APP_WIN) {
                 unregister_code(KC_LGUI);
                 APP_WIN = false;
             }
-            pointing_mode_key_momentary(PM_WIN_POS, record);
-        break;
+            pointing_modes_key_momentary(PM_WIN_POS, record->event.pressed);
+            break;
 #if defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
         case PM_SWITCH:
             if (record->event.pressed) {
-                 break;
+                uint8_t next = (pointing_modes_get_active_device() == PM_LEFT_DEVICE) ? PM_RIGHT_DEVICE : PM_LEFT_DEVICE;
+                pointing_modes_set_active_device(next);
             }
+            break;
 #endif
-        break;
-        case ROUTE:
-            if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                tap_code(KC_X);
-            }
-        break;
-        case ROTATE:
-            if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                tap_code(KC_R);
-            }
-        break;
-        case DRAG_TRACKS:
-            if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                tap_code(KC_D);
-            }
-        break;
-        case PLACE_VIA:
-            if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                tap_code(KC_V);
-            }
-        break;
-        case TRACK_WIDTH:
-            if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                tap_code(KC_W);
-            }
-        break;
-        case VIA_WIDTH:
-            if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                tap_code(KC_BACKSLASH);
-            }
-        break;
-        case TRACK_POSTURE:
-            if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                tap_code(KC_SLASH);
-            }
-        break;
-        case TRACK_CORNER_MODE:
-            if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                tap_code16(C(KC_SLASH));
-            }
-        break;
         case PMR_DRAG:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                set_pointing_mode_device(1);
-                toggle_pointing_mode_id(2);
+                POINTING_HAPTIC_PULSE();
+                pointing_modes_set_active_device(PM_RIGHT_DEVICE);
+                pointing_modes_toggle_mode(PM_DRAG);
             }
-        break;
-        case PMR_LEFT:
+            break;
+        case PML_DRAG:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                set_pointing_mode_device(0);
-                toggle_pointing_mode_id(2);
+                POINTING_HAPTIC_PULSE();
+                pointing_modes_set_active_device(PM_LEFT_DEVICE);
+                pointing_modes_toggle_mode(PM_DRAG);
             }
-        break;
+            break;
         case PMR_VOL:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                set_pointing_mode_device(1);
-                toggle_pointing_mode_id(5);
+                POINTING_HAPTIC_PULSE();
+                pointing_modes_set_active_device(PM_RIGHT_DEVICE);
+                pointing_modes_toggle_mode(PM_VOL);
             }
-        break;
+            break;
         case PML_VOL:
             if (record->event.pressed) {
-    	        drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
-                set_pointing_mode_device(0);
-                toggle_pointing_mode_id(5);
+                POINTING_HAPTIC_PULSE();
+                pointing_modes_set_active_device(PM_LEFT_DEVICE);
+                pointing_modes_toggle_mode(PM_VOL);
             }
-
-        break;
+            break;
+        case ROUTE:
+            if (record->event.pressed) {
+                POINTING_HAPTIC_PULSE();
+                tap_code(KC_X);
+            }
+            break;
+        case ROTATE:
+            if (record->event.pressed) {
+                POINTING_HAPTIC_PULSE();
+                tap_code(KC_R);
+            }
+            break;
+        case DRAG_TRACKS:
+            if (record->event.pressed) {
+                POINTING_HAPTIC_PULSE();
+                tap_code(KC_D);
+            }
+            break;
+        case PLACE_VIA:
+            if (record->event.pressed) {
+                POINTING_HAPTIC_PULSE();
+                tap_code(KC_V);
+            }
+            break;
+        case TRACK_WIDTH:
+            if (record->event.pressed) {
+                POINTING_HAPTIC_PULSE();
+                tap_code(KC_W);
+            }
+            break;
+        case VIA_WIDTH:
+            if (record->event.pressed) {
+                POINTING_HAPTIC_PULSE();
+                tap_code(KC_BACKSLASH);
+            }
+            break;
+        case TRACK_POSTURE:
+            if (record->event.pressed) {
+                POINTING_HAPTIC_PULSE();
+                tap_code(KC_SLASH);
+            }
+            break;
+        case TRACK_CORNER_MODE:
+            if (record->event.pressed) {
+                POINTING_HAPTIC_PULSE();
+                tap_code16(C(KC_SLASH));
+            }
+            break;
         default:
-        break;
+            break;
     }
     return true;
 }
@@ -348,9 +330,8 @@ bool is_mouse_record_user(uint16_t keycode, keyrecord_t* record) {
         case VIA_WIDTH:
         case TRACK_POSTURE:
         case TRACK_CORNER_MODE:
-        return true;
+            return true;
     }
     return false;
 }
 #endif
-

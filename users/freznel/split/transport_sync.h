@@ -26,6 +26,7 @@ typedef union {
         bool    swap_hands           :1;
         bool    host_driver_disabled :1;
         uint8_t unicode_typing_mode  :3;
+        uint8_t detected_os          :3;
         bool    is_oled_enabled      :1;
         bool    is_caps_word_on      :1;
         bool    pointing_side        :1;

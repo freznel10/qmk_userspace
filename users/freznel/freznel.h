@@ -5,12 +5,12 @@
 #pragma once
 #include QMK_KEYBOARD_H
 
-#include "eeprom.h"
+#include "keycode_compat.h"
+#include "custom_pointing_modes.h"
 #include "keyrecords/wrappers.h"
 #include "keyrecords/process_records.h"
 #include "callbacks.h"
 #include "super_alt_tab.h"
-#include "autocorrect_data.h"
 
 #ifdef TAP_DANCE_ENABLE
 #    include "keyrecords/tap_dances.h"
@@ -46,7 +46,7 @@ enum userspace_layers {
     _DVORAK,
     LAST_DEFAULT_LAYER = _DVORAK,
     _MOUSE,
-    // _MEDIA,
+    _MEDIA,
     _LOWER,
     _RAISE,
     _ADJUST,
@@ -90,7 +90,7 @@ enum userspace_layers {
 #define MODS_LCTRL  ((get_mods() | get_oneshot_mods()) & MOD_BIT(KC_LCTL))
 #define MODS_LALT   ((get_mods() | get_oneshot_mods()) & MOD_BIT(KC_LALT))
 #define MODS_LGUI   ((get_mods() | get_oneshot_mods()) & MOD_BIT(KC_LGUI))
-#define MODS_RSHIFT ((get_mods() | get_oneshot_mods()) & MOD_BIT(KC_LRFT))
+#define MODS_RSHIFT ((get_mods() | get_oneshot_mods()) & MOD_BIT(KC_RSFT))
 #define MODS_RCTRL  ((get_mods() | get_oneshot_mods()) & MOD_BIT(KC_RCTL))
 #define MODS_RALT   ((get_mods() | get_oneshot_mods()) & MOD_BIT(KC_RALT))
 #define MODS_RGUI   ((get_mods() | get_oneshot_mods()) & MOD_BIT(KC_RGUI))
@@ -122,5 +122,3 @@ void press_super_tab (bool shift);
 void press_super_ctrl_tab (bool shift);
 void unregister_super_tab(void);
 void unregister_super_ctrl_tab(void);
-
-

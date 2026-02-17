@@ -195,7 +195,7 @@ bool process_record_painter(uint16_t keycode, keyrecord_t *record);
 #    endif
 #endif
 
-#define KC_RESET RESET
+#define KC_RESET QK_BOOT
 #define KC_RST   KC_RESET
 
 #define BK_LWER LT(_LOWER, KC_BSPC)
@@ -231,12 +231,16 @@ bool process_record_painter(uint16_t keycode, keyrecord_t *record);
 #define OS_RCTL OSM(MOD_RCTL)
 #define OS_LALT OSM(MOD_LALT)
 #define OS_RALT OSM(MOD_RALT)
+#ifndef OS_MEH
 #define OS_MEH OSM(MOD_MEH)
+#endif
+#ifndef OS_HYPR
 #define OS_HYPR OSM(MOD_HYPR)
+#endif
 
 #define ALT_APP ALT_T(KC_APP)
 
-#define MG_NKRO MAGIC_TOGGLE_NKRO
+#define MG_NKRO NK_TOGG
 
 #define AUTO_CTN AUTOCORRECT_TOGGLE
 
@@ -258,3 +262,7 @@ We use custom codes here, so we can substitute the right stuff
 #endif  // TAP_DANCE_ENABLE
 
 #define REBOOT QK_REBOOT
+
+#define PMR_LEFT PML_DRAG
+#define PMR_RGHT PMR_VOL
+#define PMR_CYD QK_PM_CYCLE_DEVICES

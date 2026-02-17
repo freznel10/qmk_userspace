@@ -75,6 +75,7 @@ CUSTOM_RGB_MATRIX ?= yes
 ifeq ($(strip $(RGB_MATRIX_ENABLE)), yes)
     ifeq ($(strip $(CUSTOM_RGB_MATRIX)), yes)
         SRC += $(USER_PATH)/rgb/rgb_matrix_stuff.c
+        SRC += $(USER_PATH)/rgb/rgb_matrix_fallback.c
         OPT_DEFS += -DCUSTOM_RGB_MATRIX
     endif
 endif
@@ -145,8 +146,5 @@ ifeq ($(strip $(CUSTOM_DYNAMIC_MACROS_ENABLE)), yes)
 endif
 
 CUSTOM_KEYLOGGER ?= no
-
-HAPTIC_ENABLE = yes
-HAPTIC_DRIVER = drv2605l
 
 SRC += keyrecords/select_word.c

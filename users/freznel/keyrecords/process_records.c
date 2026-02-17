@@ -3,18 +3,28 @@
 
 #include "freznel.h"
 #include "version.h"
-#include "drivers/haptic/drv2605l.h"
 
 #ifdef CUSTOM_DYNAMIC_MACROS_ENABLE
 #    include "keyrecords/dynamic_macros.h"
 #endif
 
 #ifdef HAPTIC_ENABLE
-#include "drivers/haptic/drv2605l.h"
+#    include "drivers/haptic/drv2605l.h"
+#    define USER_HAPTIC_PULSE() drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100)
+#else
+#    define USER_HAPTIC_PULSE() ((void)0)
 #endif
 
 #include "select_word.h"
 #include "pointing_device_auto_mouse.h"
+
+#if defined(RGB_TOG)
+#    define USER_RGB_TOGGLE_KEYCODE RGB_TOG
+#elif defined(UG_TOGG)
+#    define USER_RGB_TOGGLE_KEYCODE UG_TOGG
+#elif defined(QK_UNDERGLOW_TOGGLE)
+#    define USER_RGB_TOGGLE_KEYCODE QK_UNDERGLOW_TOGGLE
+#endif
 
 
 
@@ -233,7 +243,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             break;
 
 #if defined(CUSTOM_RGBLIGHT) || defined(CUSTOM_RGB_MATRIX)
-        case RGB_TOG:
+#    ifdef USER_RGB_TOGGLE_KEYCODE
+        case USER_RGB_TOGGLE_KEYCODE:
             // Split keyboards need to trigger on key-up for edge-case issue
 #    ifndef SPLIT_KEYBOARD
             if (record->event.pressed) {
@@ -249,11 +260,26 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
             break;
-        case RGB_MODE_FORWARD ... RGB_MODE_GRADIENT: // quantum_keycodes.h L400 for definitions
+#    endif
+#    ifdef RGB_MODE_FORWARD
+        case RGB_MODE_FORWARD ... RGB_MODE_GRADIENT:
+#    endif
+#    ifdef UG_NEXT
+        case UG_NEXT:
+        case UG_PREV:
+        case UG_HUEU:
+        case UG_HUED:
+        case UG_SATU:
+        case UG_SATD:
+        case UG_VALU:
+        case UG_VALD:
+        case UG_SPDU:
+        case UG_SPDD:
+#    endif
             if (record->event.pressed) {
-                bool is_eeprom_updated;
+                bool is_eeprom_updated = false;
 #    if defined(CUSTOM_RGBLIGHT) && !defined(RGBLIGHT_DISABLE_KEYCODES)
-                // This disables layer indication, as it's assumed that if you're changing this ... you want that disabled
+                // Disable layer indication when manually changing RGB modes.
                 if (userspace_config.rgb_layer_change) {
                     userspace_config.rgb_layer_change = false;
                     dprintf("rgblight layer change [EEPROM]: %u\n", userspace_config.rgb_layer_change);
@@ -296,18 +322,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case NX_TAB:
             if (record->event.pressed) {
                 tap_code16(C(KC_TAB));
-                drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+                USER_HAPTIC_PULSE();
             }
             break;
         case BK_TAB:
             if (record->event.pressed) {
                 tap_code16(S(C(KC_TAB)));
-                drv2605l_pulse(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+                USER_HAPTIC_PULSE();
             }
             break;
         case RAISE_TOGGLE:
             if (record->event.pressed) {
-                layer_invert(DRV2605L_EFFECT_MEDIUM_CLICK_1_100);
+                layer_invert(_RAISE);
             }
         break;
         case BSPC_LSFT_CLEAR:
@@ -435,4 +461,3 @@ __attribute__((weak)) void post_process_record_keymap(uint16_t keycode, keyrecor
 void                       post_process_record_user(uint16_t keycode, keyrecord_t *record) {
     post_process_record_keymap(keycode, record);
 }
-
