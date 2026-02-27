@@ -164,6 +164,8 @@ bool process_record_painter(uint16_t keycode, keyrecord_t *record);
 #define TAB_RSE LT(_RAISE, KC_TAB)
 #define C_L C(KC_LEFT)
 #define C_R C(KC_RIGHT)
+#define G_L G(KC_LEFT)
+#define G_R G(KC_RIGHT)
 #define CS_L C(S(KC_LEFT))
 #define CS_R C(S(KC_RIGHT))
 

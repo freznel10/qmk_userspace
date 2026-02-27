@@ -10,6 +10,7 @@ OLED_ENABLE                  = no
 KEYBOARD_SHARED_EP = no   # Free up some extra endpoints - needed if console+mouse+extra
 MOUSE_SHARED_EP    = no
 OLED_DRIVER = custom
+CONSOLE_ENABLE=yes
 
 POINTING_DEVICE_ENABLE = yes
 # #POINTING_DEVICE_DRIVER = cirque_pinnacle_i2c
@@ -20,8 +21,8 @@ HAPTIC_DRIVER = drv2605l
 # PS2_MOUSE_ENABLE = yes
 # PS2_DRIVER = vendor
 
-POINTING_DEVICE_DRIVER = cirque_pinnacle_spi
-# POINTING_DEVICE_DRIVER = pmw3360
+# POINTING_DEVICE_DRIVER = cirque_pinnacle_spi
+POINTING_DEVICE_DRIVER = pmw3360
 
 WS2812_DRIVER = vendor
 RGB_MATRIX_ENABLE = yes

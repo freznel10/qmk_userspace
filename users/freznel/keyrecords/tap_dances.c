@@ -132,13 +132,13 @@ void DRG_SNP_finished(tap_dance_state_t *state, void *user_data) {
                 unichunky_set_pointer_dragscroll_enabled(!unichunky_get_pointer_dragscroll_enabled());
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
-                if (is_keyboard_master()) {
+/*                 if (is_keyboard_master()) {
                     pointing_modes_set_active_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
-                }
+                } */
                 pointing_modes_toggle_mode(PM_DRAG);
             #endif
             break;
-            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
+            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem_rev1)
                 pointing_modes_toggle_mode(PM_DRAG);
             #endif
             break;
@@ -147,13 +147,13 @@ void DRG_SNP_finished(tap_dance_state_t *state, void *user_data) {
                 unichunky_set_pointer_dragscroll_enabled(1);
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
-               if (is_keyboard_master()) {
+/*                if (is_keyboard_master()) {
                     pointing_modes_set_active_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
-                }
+                } */
                 pointing_modes_set_mode(PM_DRAG);
             #endif
             break;
-            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
+            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem_rev1)
                 pointing_modes_set_mode(PM_DRAG);
             #endif
             break;
@@ -161,13 +161,13 @@ void DRG_SNP_finished(tap_dance_state_t *state, void *user_data) {
             #if defined(KEYBOARD_unichunky)
                 unichunky_set_pointer_sniping_enabled(!unichunky_get_pointer_sniping_enabled());
             #endif
-            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
+            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem_rev1)
                 pointing_modes_toggle_mode(PM_PRECISION);
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
-               if (is_keyboard_master()) {
+/*                if (is_keyboard_master()) {
                     pointing_modes_set_active_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
-                }
+                } */
                 pointing_modes_toggle_mode(PM_PRECISION);
             #endif
             break;
@@ -175,13 +175,13 @@ void DRG_SNP_finished(tap_dance_state_t *state, void *user_data) {
             #if defined(KEYBOARD_unichunky)
                 pointing_modes_set_mode(PM_PRECISION);
             #endif
-            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
+            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem_rev1)
                 pointing_modes_set_mode(PM_PRECISION);
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
-               if (is_keyboard_master()) {
+/*                if (is_keyboard_master()) {
                     pointing_modes_set_active_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
-                }
+                } */
                 pointing_modes_set_mode(PM_PRECISION);
             #endif
             break;
@@ -199,9 +199,9 @@ void DRG_SNP_reset(tap_dance_state_t *state, void *user_data) {
                 unichunky_set_pointer_dragscroll_enabled(0);
             #endif
             #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)
-                if (is_keyboard_master()) {
+/*                 if (is_keyboard_master()) {
                     pointing_modes_set_active_device(is_keyboard_left() ? 1 : 0); //set to the peripheral side
-                }
+                } */
                 pointing_modes_set_mode(PM_NONE);
             #endif
             break;
@@ -246,7 +246,7 @@ void DRG_SNP_R_finished(tap_dance_state_t *state, void *user_data) {
                         break;
                 }
             #endif
-            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
+            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem_rev1)
                 pointing_modes_toggle_mode(PM_DRAG);
             #endif
             break;
@@ -265,7 +265,7 @@ void DRG_SNP_R_finished(tap_dance_state_t *state, void *user_data) {
                         break;
                 }
             #endif
-            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
+            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem_rev1)
                 pointing_modes_set_mode(PM_DRAG);
             #endif
             break;
@@ -273,7 +273,7 @@ void DRG_SNP_R_finished(tap_dance_state_t *state, void *user_data) {
             #if defined(KEYBOARD_unichunky)
                 unichunky_set_pointer_sniping_enabled(!unichunky_get_pointer_sniping_enabled());
             #endif
-            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
+            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem_rev1)
                 pointing_modes_toggle_mode(PM_PRECISION);
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
@@ -291,7 +291,7 @@ void DRG_SNP_R_finished(tap_dance_state_t *state, void *user_data) {
             #if defined(KEYBOARD_unichunky)
                 pointing_modes_set_mode(PM_PRECISION);
             #endif
-            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
+            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem_rev1)
                 pointing_modes_set_mode(PM_PRECISION);
             #endif
             #if (defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)) && defined(SPLIT_POINTING_ENABLE) && defined(POINTING_DEVICE_COMBINED)
@@ -320,7 +320,7 @@ void DRG_SNP_R_reset(tap_dance_state_t *state, void *user_data) {
             #if defined(KEYBOARD_unichunky)
                 unichunky_set_pointer_dragscroll_enabled(0);
             #endif
-            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
+            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem_rev1)
                 pointing_modes_set_mode(PM_NONE);
             #endif
             #if defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)
@@ -333,7 +333,7 @@ void DRG_SNP_R_reset(tap_dance_state_t *state, void *user_data) {
             #if defined(KEYBOARD_unichunky)
                 unichunky_set_pointer_sniping_enabled(0);
             #endif
-            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem)
+            #if defined(KEYBOARD_zerf9) || defined(KEYBOARD_zerfstudios_emblem_rev1)
                 pointing_modes_toggle_mode(PM_NONE);
             #endif
             #if defined(KEYBOARD_zerfstudios) || defined(KEYBOARD_chunkx)
